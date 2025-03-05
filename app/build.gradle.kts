@@ -71,4 +71,11 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // Retrofit & Gson Converter for API calls
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+
+    // Coil for image loading
+    implementation(libs.coil.compose)
 }
