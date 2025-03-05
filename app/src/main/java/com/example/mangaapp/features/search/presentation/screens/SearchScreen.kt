@@ -1,6 +1,7 @@
 package com.example.mangaapp.features.search.presentation.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,10 @@ import com.example.mangaapp.features.search.domain.models.Manga
 import com.example.mangaapp.features.search.presentation.viewmodels.SearchViewModel
 
 @Composable
-fun SearchScreen(viewModel: SearchViewModel) {
+fun SearchScreen(
+    viewModel: SearchViewModel,
+    onMangaClick: (String) -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
     Column(modifier = Modifier
         .fillMaxSize()
@@ -71,7 +75,10 @@ fun SearchScreen(viewModel: SearchViewModel) {
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(uiState.mangaList) { manga ->
-                MangaCard(manga = manga)
+                MangaCard(
+                    manga = manga,
+                    onClick = { onMangaClick(manga.id) }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -79,8 +86,17 @@ fun SearchScreen(viewModel: SearchViewModel) {
 }
 
 @Composable
-fun MangaCard(manga: Manga) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = 4.dp) {
+fun MangaCard(
+    manga: Manga,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() },
+        elevation = 4.dp
+    ) {
         Row(modifier = Modifier.padding(8.dp)) {
             Image(
                 painter = rememberAsyncImagePainter(manga.coverUrl),
