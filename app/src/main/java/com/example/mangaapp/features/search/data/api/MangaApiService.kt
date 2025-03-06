@@ -1,5 +1,6 @@
 package com.example.mangaapp.features.search.data.api
 
+import com.example.mangaapp.features.chapterreader.data.models.ChapterReaderResponse
 import com.example.mangaapp.features.chapters.data.models.ChapterResponse
 import com.example.mangaapp.features.details.data.models.MangaDetailsResponse
 import com.example.mangaapp.features.search.data.models.MangaResponse
@@ -31,4 +32,9 @@ interface MangaApiService {
         @Query("limit") limit: Int = 50,
         @Query("translatedLanguage[]") translatedLanguage: List<String> = listOf("en")
     ): ChapterResponse
+
+    @GET("at-home/server/{chapterId}")
+    suspend fun getChapterPages(
+        @Path("chapterId") chapterId: String
+    ): ChapterReaderResponse
 }

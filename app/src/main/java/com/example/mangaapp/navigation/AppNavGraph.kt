@@ -14,6 +14,10 @@ import com.example.mangaapp.features.authentication.presentation.LoginScreen
 import com.example.mangaapp.features.authentication.presentation.LoginViewModel
 import com.example.mangaapp.features.authentication.presentation.RegisterScreen
 import com.example.mangaapp.features.authentication.presentation.RegisterViewModel
+import com.example.mangaapp.features.chapterreader.data.ChapterReaderRepositoryImpl
+import com.example.mangaapp.features.chapterreader.domain.usecases.GetChapterPagesUseCase
+import com.example.mangaapp.features.chapterreader.presentation.screens.ChapterReaderScreen
+import com.example.mangaapp.features.chapterreader.presentation.viewmodels.ChapterReaderViewModel
 import com.example.mangaapp.features.chapters.data.ChapterRepositoryImpl
 import com.example.mangaapp.features.chapters.domain.usecases.GetChaptersUseCase
 import com.example.mangaapp.features.chapters.presentation.screens.ChapterScreen
@@ -33,6 +37,7 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object Details : Screen("details/{mangaId}")
     object Chapters : Screen("chapters/{mangaId}")
+    object Reader : Screen("reader/{chapterId}")
 }
 
 @Composable
@@ -92,7 +97,23 @@ fun AppNavGraph() {
             }
             ChapterScreen(
                 viewModel = chapterViewModel,
-                mangaId = mangaId
+                mangaId = mangaId,
+                onChapterRead = { chapterId ->
+                    navController.navigate("reader/$chapterId")
+                }
+            )
+        }
+        composable(
+            route = Screen.Reader.route,
+            arguments = listOf(navArgument("chapterId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+            val chapterReaderViewModel = remember {
+                ChapterReaderViewModel(GetChapterPagesUseCase(ChapterReaderRepositoryImpl()))
+            }
+            ChapterReaderScreen(
+                chapterId = chapterId,
+                viewModel = chapterReaderViewModel
             )
         }
     }
