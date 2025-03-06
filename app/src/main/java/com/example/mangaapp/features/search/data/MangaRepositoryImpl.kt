@@ -14,7 +14,11 @@ class MangaRepositoryImpl : MangaRepository {
         "Fantasy" to "cdc58593-87dd-415e-bbc0-2ec27bf404cc"
     )
 
-    override suspend fun getMangaList(title: String?, genre: String?): Result<List<Manga>> {
+    override suspend fun getMangaList(
+        title: String?,
+        genre: String?,
+        offset: Int
+    ): Result<List<Manga>> {
         return try {
             val safeTitle = title?.takeIf { it.isNotBlank() }
 
@@ -26,6 +30,7 @@ class MangaRepositoryImpl : MangaRepository {
 
             val response = MangaApiClient.apiService.getMangaList(
                 title = safeTitle,
+                offset = offset,
                 includedTags = tagIds
             )
             val mangaList = response.data.map { mangaData ->
