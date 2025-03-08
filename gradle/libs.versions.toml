@@ -19,8 +19,13 @@ firebaseFirestore = "25.1.2"
 compose = "1.7.8"
 coroutines = "1.9.0"
 navigationCompose = "2.8.8"
-retrofit = "2.9.0"
-coil = "2.2.2"
+retrofit = "2.11.0"
+coil = "2.6.0"
+firebaseStorage = "21.0.1"
+
+accompanist = "0.28.0"
+
+room = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,6 +67,14 @@ retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref 
 
 # Coil for Image Loading in Compose
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+
+# Room
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

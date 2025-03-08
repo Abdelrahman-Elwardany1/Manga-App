@@ -9,13 +9,13 @@ class ChapterRepositoryImpl : ChapterRepository {
         return try {
             val response = MangaApiClient.apiService.getChapters(mangaId = mangaId)
             val chapters = response.data.map { chapterData ->
-                val attr = chapterData.attributes
+                val attributes = chapterData.attributes
                 Chapter(
                     id = chapterData.id,
-                    title = attr.title ?: "No Title",
-                    chapterNumber = attr.chapter ?: "N/A",
-                    pages = attr.pages ?: 0,
-                    language = attr.translatedLanguage ?: "Unknown"
+                    title = attributes.title ?: "No Title",
+                    chapterNumber = attributes.chapter ?: "N/A",
+                    pages = attributes.pages ?: 0,
+                    language = attributes.translatedLanguage ?: "Unknown"
                 )
             }
             Result.success(chapters)

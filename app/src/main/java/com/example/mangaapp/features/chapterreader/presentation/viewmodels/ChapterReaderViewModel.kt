@@ -4,17 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangaapp.features.chapterreader.domain.models.ChapterPage
 import com.example.mangaapp.features.chapterreader.domain.usecases.GetChapterPagesUseCase
+import com.example.mangaapp.features.chapterreader.presentation.ChapterReaderUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-data class ChapterReaderUiState(
-    val pages: List<ChapterPage> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
-
-class ChapterReaderViewModel(private val getChapterPagesUseCase: GetChapterPagesUseCase) : ViewModel() {
+class ChapterReaderViewModel(
+    private val getChapterPagesUseCase: GetChapterPagesUseCase
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ChapterReaderUiState())
     val uiState: StateFlow<ChapterReaderUiState> = _uiState
 

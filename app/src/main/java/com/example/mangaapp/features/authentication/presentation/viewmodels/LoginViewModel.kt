@@ -1,4 +1,4 @@
-package com.example.mangaapp.features.authentication.presentation
+package com.example.mangaapp.features.authentication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

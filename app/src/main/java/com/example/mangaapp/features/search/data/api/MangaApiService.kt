@@ -30,7 +30,9 @@ interface MangaApiService {
     suspend fun getChapters(
         @Query("manga") mangaId: String,
         @Query("limit") limit: Int = 50,
-        @Query("translatedLanguage[]") translatedLanguage: List<String> = listOf("en")
+        @Query("offset") offset: Int = 0,
+        @Query("translatedLanguage[]") translatedLanguage: List<String> = listOf("en"),
+        @Query("order[chapter]") order: String = "desc"
     ): ChapterResponse
 
     @GET("at-home/server/{chapterId}")

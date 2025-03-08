@@ -2,17 +2,11 @@ package com.example.mangaapp.features.chapters.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mangaapp.features.chapters.domain.models.Chapter
 import com.example.mangaapp.features.chapters.domain.usecases.GetChaptersUseCase
+import com.example.mangaapp.features.chapters.presentation.ChapterUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-data class ChapterUiState(
-    val chapters: List<Chapter> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 class ChapterViewModel(private val getChaptersUseCase: GetChaptersUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(ChapterUiState())
