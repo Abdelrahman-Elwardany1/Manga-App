@@ -39,9 +39,7 @@ class RegisterViewModel(
         )
 
         if (_uiState.value.confirmPassword.isNotEmpty()) {
-            if (newPassword != _uiState.value.confirmPassword) {
-                _uiState.value = _uiState.value.copy(error = "Passwords do not match")
-            } else if (regexError == null) {
+            if (regexError == null) {
                 _uiState.value = _uiState.value.copy(error = null)
             }
         }
@@ -52,7 +50,7 @@ class RegisterViewModel(
 
         if (newConfirmPassword.isNotEmpty()) {
             if (_uiState.value.password != newConfirmPassword) {
-                _uiState.value = _uiState.value.copy(error = "Passwords do not match")
+                _uiState.value = _uiState.value.copy(error = "")
             } else if (_uiState.value.password.matches(passwordRegex)) {
                 _uiState.value = _uiState.value.copy(error = null)
             }

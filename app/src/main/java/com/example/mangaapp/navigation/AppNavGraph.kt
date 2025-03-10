@@ -152,7 +152,7 @@ fun AppNavGraph() {
             ) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Home.route,
+                    startDestination = Screen.Login.route,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     composable(Screen.Login.route) {
