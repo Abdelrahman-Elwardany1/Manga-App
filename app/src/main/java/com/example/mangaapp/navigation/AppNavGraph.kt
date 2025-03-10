@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -86,6 +87,7 @@ import com.example.mangaapp.features.profile.presentation.screens.ProfileScreen
 import com.example.mangaapp.features.profile.presentation.viewmodels.ProfileViewModel
 import com.example.mangaapp.features.search.data.MangaRepositoryImpl
 import com.example.mangaapp.features.search.domain.usecases.GetMangaListUseCase
+import com.example.mangaapp.features.search.domain.usecases.GetRandomMangaUseCase
 import com.example.mangaapp.features.search.presentation.screens.SearchScreen
 import com.example.mangaapp.features.search.presentation.viewmodels.SearchViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -108,10 +110,20 @@ data class BottomNavItem(
     val icon: ImageVector
 )
 
+val mainScreens = listOf(
+    Screen.Home.route,
+    Screen.Search.route,
+    Screen.History.route,
+    Screen.Profile.route
+)
+
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
     val systemUiController = rememberSystemUiController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     SideEffect {
         systemUiController.setSystemBarsColor(color = Color.Transparent, darkIcons = false)
     }
@@ -167,7 +179,12 @@ fun AppNavGraph() {
                         )
                     }
                     composable(Screen.Search.route) {
-                        val searchViewModel = remember { SearchViewModel(GetMangaListUseCase(MangaRepositoryImpl())) }
+                        val mangaRepository = MangaRepositoryImpl()
+                        val getMangaListUseCase = GetMangaListUseCase(mangaRepository)
+                        val getRandomMangaUseCase = GetRandomMangaUseCase(mangaRepository)
+                        val searchViewModel = remember {
+                            SearchViewModel(getMangaListUseCase, getRandomMangaUseCase)
+                        }
                         SearchScreen(
                             viewModel = searchViewModel,
                             onMangaClick = { mangaId -> navController.navigate("details/$mangaId") }
@@ -196,12 +213,14 @@ fun AppNavGraph() {
                     ) { backStackEntry ->
                         val mangaId = backStackEntry.arguments?.getString("mangaId") ?: ""
                         val context = LocalContext.current
+
                         val db = HistoryDatabase.getInstance(context)
                         val historyRepository = HistoryRepositoryImpl(db.historyDao())
                         val getMangaDetailsForHistoryUseCase = GetMangaDetailsForHistoryUseCase(DetailsRepositoryImpl())
                         val historyViewModel = remember {
                             HistoryViewModel(historyRepository, getMangaDetailsForHistoryUseCase)
                         }
+
                         val detailsViewModel = remember { MangaDetailsViewModel(GetMangaDetailsUseCase(DetailsRepositoryImpl())) }
                         val chapterViewModel = remember { ChapterViewModel(GetChaptersUseCase(ChapterRepositoryImpl())) }
                         val detailsUiState by detailsViewModel.uiState.collectAsState()
@@ -212,29 +231,36 @@ fun AppNavGraph() {
                             chapterViewModel.loadChapters(mangaId)
                         }
 
-                        when {
-                            detailsUiState.isLoading || chaptersUiState.isLoading -> {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator()
-                                }
+                        if (detailsUiState.isLoading) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
                             }
-                            detailsUiState.error != null -> {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Text(text = "Error: ${detailsUiState.error}")
-                                }
+                        } else if (detailsUiState.error != null) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "Error: ${detailsUiState.error}")
                             }
-                            else -> {
-                                val manga = detailsUiState.manga
-                                val chapters = chaptersUiState.chapters
-                                if (manga != null) {
+                        } else {
+                            val manga = detailsUiState.manga
+                            if (manga != null) {
+                                Column {
                                     MangaDetailsScreen(
                                         manga = manga,
-                                        chapters = chapters,
+                                        chapters = chaptersUiState.chapters,
                                         onChapterClick = { chapterId ->
                                             historyViewModel.insertHistory(manga.id)
                                             navController.navigate("reader/$chapterId")
                                         }
                                     )
+                                    if (chaptersUiState.isLoading) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -265,14 +291,17 @@ fun AppNavGraph() {
                 }
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-                .navigationBarsPadding(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            FloatingBottomAppBar(navController = navController, items = bottomNavItems)
+
+        if (currentRoute in mainScreens) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .navigationBarsPadding(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                FloatingBottomAppBar(navController = navController, items = bottomNavItems)
+            }
         }
     }
 }
@@ -285,112 +314,59 @@ fun FloatingBottomAppBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
-            .shadow(
-                elevation = 16.dp,
-                shape = RoundedCornerShape(32.dp),
-                clip = true
-            )
-            .background(Color.Transparent)
-            .graphicsLayer { clip = false },
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        BottomAppBar(
-            containerColor = Color(0xFFFF004C),
+    if (currentRoute in mainScreens) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
-                .clip(RoundedCornerShape(32.dp)),
-            tonalElevation = 0.dp
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = RoundedCornerShape(32.dp),
+                    clip = true
+                )
+                .background(Color.Transparent)
+                .graphicsLayer { clip = false },
+            contentAlignment = Alignment.BottomCenter
         ) {
-            items.forEach { item ->
-                val isSelected = currentRoute == item.route
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            tint = if (isSelected) Color.White else Color(0xFFB0B0B0)
-                        )
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isSelected) Color.White else Color(0xFFB0B0B0)
-                        )
+            BottomAppBar(
+                containerColor = Color(0xFFDA0037),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(32.dp)),
+                tonalElevation = 0.dp
+            ) {
+                items.forEach { item ->
+                    val isSelected = currentRoute == item.route
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = if (isSelected) Color.White else Color(0xFFC7BEBE)
+                            )
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (isSelected) Color.White else Color(0xFFC7BEBE)
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
-/*@Composable
-fun FloatingBottomNavigationBar(
-    navController: NavHostController,
-    items: List<BottomNavItem>
-) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-            .background(Color.Transparent)
-    ) {
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(10.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFF004C)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-                .background(Color.Transparent)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items.forEach { item ->
-                    val isSelected = currentRoute == item.route
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            tint = if (isSelected) Color.White else Color(0xFFB0B0B0)
-                        )
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isSelected) Color.White else Color(0xFFB0B0B0)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}*/

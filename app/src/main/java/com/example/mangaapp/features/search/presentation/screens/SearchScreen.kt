@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,8 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
 import coil.compose.rememberAsyncImagePainter
 import com.example.mangaapp.features.search.domain.models.Manga
 import com.example.mangaapp.features.search.presentation.viewmodels.SearchViewModel
@@ -48,13 +52,19 @@ fun SearchScreen(
     onMangaClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val navigationBarHeight = 80.dp // Consistent height
+    val navigationBarHeight = 80.dp
+
+    LaunchedEffect(Unit) {
+        if (uiState.searchQuery.isBlank() && uiState.selectedGenre.isBlank()) {
+            viewModel.loadRandomManga()
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(top = 32.dp, start = 16.dp, end = 16.dp)
     ) {
         OutlinedTextField(
             value = uiState.searchQuery,
@@ -62,9 +72,9 @@ fun SearchScreen(
             label = { Text("Search manga") },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFF004C),
+                focusedBorderColor = Color(0xFFDA0037),
                 unfocusedBorderColor = Color.Gray,
-                cursorColor = Color(0xFFFF004C)
+                cursorColor = Color(0xFFDA0037)
             )
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,10 +85,7 @@ fun SearchScreen(
             val genres = listOf("Action", "Adventure", "Comedy", "Drama", "Fantasy")
             genres.forEach { genre ->
                 TextButton(onClick = { viewModel.onGenreSelected(genre) }) {
-                    Text(
-                        text = genre,
-                        color = Color(0xFFFF004C)
-                    )
+                    Text(text = genre, color = Color(0xFFDA0037))
                 }
             }
         }
@@ -86,20 +93,28 @@ fun SearchScreen(
         Button(
             onClick = { viewModel.onSearch() },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF004C))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDA0037))
         ) {
             Text(text = "Search", color = Color.White)
         }
         Spacer(modifier = Modifier.height(16.dp))
         if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
         uiState.error?.let { error ->
-            Text(text = error, color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+            Text(
+                text = error,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
         LazyColumn(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
                 .background(androidx.compose.material3.MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(bottom = navigationBarHeight)

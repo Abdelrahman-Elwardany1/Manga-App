@@ -8,6 +8,7 @@ import com.example.mangaapp.features.search.data.models.TagResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.QueryMap
 
 interface MangaApiService {
     @GET("manga")
@@ -15,6 +16,7 @@ interface MangaApiService {
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0,
         @Query("title") title: String? = null,
+        @QueryMap(encoded = true) order: Map<String, String> = emptyMap(),
         @Query("includes[]") includes: List<String> = listOf("cover_art"),
         @Query("includedTags[]") includedTags: List<String> = emptyList(),
         @Query("availableTranslatedLanguage[]") availableTranslatedLanguage: List<String> = listOf("en")
@@ -29,8 +31,8 @@ interface MangaApiService {
     @GET("chapter")
     suspend fun getChapters(
         @Query("manga") mangaId: String,
-        @Query("limit") limit: Int = 50,
-        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguage: List<String> = listOf("en"),
         @Query("order[chapter]") order: String = "desc"
     ): ChapterResponse

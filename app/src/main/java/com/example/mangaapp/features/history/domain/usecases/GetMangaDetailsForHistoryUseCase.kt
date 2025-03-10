@@ -6,18 +6,24 @@ import com.example.mangaapp.features.search.domain.models.Manga
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 
 class GetMangaDetailsForHistoryUseCase(
     private val detailsRepository: DetailsRepository
 ) {
-    suspend operator fun invoke(mangaIds: List<String>): Result<List<Manga>> {
+    suspend operator fun invoke(mangaIds: List<String>, chunkSize: Int = 5, delayMillis: Long = 1000L): Result<List<Manga>> {
         return try {
-            val detailsList = coroutineScope {
-                mangaIds.map { id ->
-                    async { detailsRepository.getMangaDetails(id) }
-                }.awaitAll().mapNotNull { it.getOrNull() }
+            val mangaList = mutableListOf<Manga>()
+            val chunks = mangaIds.chunked(chunkSize)
+            for (chunk in chunks) {
+                val detailsChunk = coroutineScope {
+                    chunk.map { id ->
+                        async { detailsRepository.getMangaDetails(id).getOrNull() }
+                    }.awaitAll().filterNotNull()
+                }
+                mangaList.addAll(detailsChunk.map { it.toManga() })
+                delay(delayMillis)
             }
-            val mangaList = detailsList.map { it.toManga() }
             Result.success(mangaList)
         } catch (e: Exception) {
             Result.failure(e)

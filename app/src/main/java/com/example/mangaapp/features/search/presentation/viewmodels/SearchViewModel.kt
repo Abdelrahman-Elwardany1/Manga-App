@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangaapp.features.search.domain.models.Manga
 import com.example.mangaapp.features.search.domain.usecases.GetMangaListUseCase
+import com.example.mangaapp.features.search.domain.usecases.GetRandomMangaUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,13 +17,20 @@ data class SearchUiState(
     val selectedGenre: String = ""
 )
 
-class SearchViewModel(private val getMangaListUseCase: GetMangaListUseCase) : ViewModel() {
+class SearchViewModel(
+    private val getMangaListUseCase: GetMangaListUseCase,
+    private val getRandomMangaUseCase: GetRandomMangaUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState
 
     init {
-        loadManga()
+        if (_uiState.value.searchQuery.isBlank() && _uiState.value.selectedGenre.isBlank()) {
+            loadRandomManga()
+        } else {
+            loadManga()
+        }
     }
 
     fun loadManga(title: String? = null, genre: String? = null) {
@@ -30,6 +38,24 @@ class SearchViewModel(private val getMangaListUseCase: GetMangaListUseCase) : Vi
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val safeTitle = title?.takeIf { it.isNotBlank() }
             val result = getMangaListUseCase(safeTitle, genre)
+            if (result.isSuccess) {
+                _uiState.value = _uiState.value.copy(
+                    mangaList = result.getOrDefault(emptyList()),
+                    isLoading = false
+                )
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    error = result.exceptionOrNull()?.message ?: "Unknown error",
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    fun loadRandomManga(limit: Int = 20) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            val result = getRandomMangaUseCase(limit)
             if (result.isSuccess) {
                 _uiState.value = _uiState.value.copy(
                     mangaList = result.getOrDefault(emptyList()),
@@ -57,7 +83,10 @@ class SearchViewModel(private val getMangaListUseCase: GetMangaListUseCase) : Vi
     }
 
     fun onSearch() {
-        loadManga(title = _uiState.value.searchQuery, genre = _uiState.value.selectedGenre)
+        if (_uiState.value.searchQuery.isNotBlank() || _uiState.value.selectedGenre.isNotBlank()) {
+            loadManga(title = _uiState.value.searchQuery, genre = _uiState.value.selectedGenre)
+        } else {
+            loadRandomManga()
+        }
     }
-
 }

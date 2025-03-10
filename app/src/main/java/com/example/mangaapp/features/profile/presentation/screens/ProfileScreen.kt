@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,10 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +33,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -42,6 +49,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     LaunchedEffect(userId) {
@@ -53,7 +61,7 @@ fun ProfileScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.uploadProfilePic(it) }
+        uri?.let { viewModel.uploadProfilePic(it, context) }
     }
 
     Surface(
@@ -62,34 +70,54 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                uiState.profileData?.let { profile ->
-                    ProfileHeader(
-                        profilePicUrl = profile.profilePicUrl,
-                        nickName = profile.nickName
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Favorite Manga",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    FavoriteMangaList()
-                }
-                uiState.error?.let { errorMsg ->
-                    Text(text = errorMsg, color = MaterialTheme.colorScheme.error)
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFDA0037))
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    uiState.profileData?.let { profile ->
+                        ProfileHeader(
+                            profilePicUrl = profile.profilePicUrl,
+                            nickName = profile.nickName,
+                            textColor = Color.White,
+                            onProfilePicClick = { imagePickerLauncher.launch("image/*") }
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-                Text(text = "Change Profile Picture")
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (!uiState.isLoading) {
+                    uiState.profileData?.let {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Favorite Manga",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.align(Alignment.Start),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FavoriteMangaList()
+                    }
+                    uiState.error?.let { errorMsg ->
+                        Text(
+                            text = errorMsg,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -98,7 +126,9 @@ fun ProfileScreen(
 @Composable
 fun ProfileHeader(
     profilePicUrl: String?,
-    nickName: String
+    nickName: String,
+    textColor: Color = Color.Black,
+    onProfilePicClick: () -> Unit
 ) {
     val painter = if (!profilePicUrl.isNullOrEmpty()) {
         rememberAsyncImagePainter(profilePicUrl)
@@ -110,21 +140,23 @@ fun ProfileHeader(
         contentDescription = "Profile Picture",
         modifier = Modifier
             .size(100.dp)
-            .clickable { },
-        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            .clip(CircleShape)
+            .clickable { onProfilePicClick() },
+        contentScale = ContentScale.Crop
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
         text = nickName,
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge,
+        color = textColor
     )
 }
 
 @Composable
 fun FavoriteMangaList() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Favorite Manga 1")
-        Text(text = "Favorite Manga 2")
-        Text(text = "Favorite Manga 3")
+        Text(text = "Favorite Manga 1", color = MaterialTheme.colorScheme.onBackground)
+        Text(text = "Favorite Manga 2", color = MaterialTheme.colorScheme.onBackground)
+        Text(text = "Favorite Manga 3", color = MaterialTheme.colorScheme.onBackground)
     }
 }

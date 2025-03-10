@@ -1,8 +1,10 @@
 package com.example.mangaapp.features.search.data
 
+import android.util.Log
 import com.example.mangaapp.features.search.data.api.MangaApiClient
 import com.example.mangaapp.features.search.domain.MangaRepository
 import com.example.mangaapp.features.search.domain.models.Manga
+import retrofit2.HttpException
 
 class MangaRepositoryImpl : MangaRepository {
 
@@ -17,22 +19,24 @@ class MangaRepositoryImpl : MangaRepository {
     override suspend fun getMangaList(
         title: String?,
         genre: String?,
-        offset: Int
+        offset: Int,
+        limit: Int,
+        order: Map<String, String>?
     ): Result<List<Manga>> {
         return try {
             val safeTitle = title?.takeIf { it.isNotBlank() }
-
-            val tagIds = genre?.let { friendlyName ->
-                genreTagMap[friendlyName]?.let { tagId ->
-                    listOf(tagId)
-                }
+            val tagIds: List<String> = genre?.let { friendlyName ->
+                genreTagMap[friendlyName]?.let { tagId -> listOf(tagId) }
             } ?: emptyList()
 
             val response = MangaApiClient.apiService.getMangaList(
                 title = safeTitle,
                 offset = offset,
+                limit = limit,
+                order = order ?: emptyMap(),
                 includedTags = tagIds
             )
+
             val mangaList = response.data.map { mangaData ->
                 val attributes = mangaData.attributes
                 val mangaTitle = attributes.title?.get("en") ?: "No Title"
@@ -49,6 +53,15 @@ class MangaRepositoryImpl : MangaRepository {
                 )
             }
             Result.success(mangaList)
+        } catch (e: HttpException) {
+            if (e.code() == 429) {
+                val retryAfter = e.response()?.headers()?.get("Retry-After")
+                Log.e(
+                    "MangaRepository",
+                    "HTTP 429: Rate limit exceeded. Retry after: $retryAfter seconds"
+                )
+            }
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -1,6 +1,8 @@
 package com.example.mangaapp.features.profile.presentation.viewmodels
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangaapp.features.profile.data.ProfileRepositoryImpl
@@ -40,31 +42,38 @@ class ProfileViewModel(
         }
     }
 
-    fun uploadProfilePic(uri: Uri) {
+    fun uploadProfilePic(uri: Uri, context: Context) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.update { it.copy(isLoading = true, error = null) }
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-            if (userId != null) {
-                try {
-                    val storageRef = FirebaseStorage.getInstance().reference.child("profilePics/$userId.jpg")
-                    val uploadTask = storageRef.putFile(uri).await()
-
-                    val downloadUrl = storageRef.downloadUrl.await().toString()
-                    val updateResult = repository.updateProfilePic(userId, downloadUrl)
-                    if (updateResult.isSuccess) {
-                        loadUserProfile(userId)
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            error = updateResult.exceptionOrNull()?.message ?: "Profile update failed"
-                        )
-                    }
-                } catch (e: Exception) {
-                    _uiState.value = _uiState.value.copy(error = e.message)
-                }
-            } else {
-                _uiState.value = _uiState.value.copy(error = "User not logged in")
+            if (userId == null) {
+                _uiState.update { it.copy(error = "User not logged in") }
+                return@launch
             }
-            _uiState.value = _uiState.value.copy(isLoading = false)
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                if (inputStream == null) {
+                    _uiState.update { it.copy(error = "Failed to open image input stream") }
+                    return@launch
+                }
+                val storageRef = FirebaseStorage.getInstance().reference.child("profilePics/$userId.jpg")
+
+                storageRef.putStream(inputStream).await()
+
+                val downloadUrl = storageRef.downloadUrl.await().toString()
+
+                val updateResult = repository.updateProfilePic(userId, downloadUrl)
+                if (updateResult.isSuccess) {
+                    loadUserProfile(userId)
+                } else {
+                    _uiState.update { it.copy(error = updateResult.exceptionOrNull()?.message ?: "Profile update failed") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message ?: "Unknown error during upload") }
+                e.printStackTrace()
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 }

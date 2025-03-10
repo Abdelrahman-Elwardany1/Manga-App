@@ -26,7 +26,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.mangaapp.features.home.presentation.viewmodels.HomeViewModel
 import com.example.mangaapp.features.search.domain.models.Manga
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 data class Manga(
     val id: String,
@@ -56,7 +54,7 @@ fun HomeScreen(
 ) {
     val popularManga by viewModel.popularManga.collectAsState()
     val recentManga by viewModel.recentManga.collectAsState()
-    val comingSoonManga by viewModel.comingSoonManga.collectAsState()
+    val relevantManga by viewModel.relevantManga.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val navigationBarHeight = 80.dp // Consistent height
@@ -74,7 +72,12 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = navigationBarHeight),
+            contentPadding = PaddingValues(
+                top = 25.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = navigationBarHeight
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
@@ -101,9 +104,9 @@ fun HomeScreen(
                 }
             }
             item {
-                SectionHeader(title = "Coming Soon")
+                SectionHeader(title = "You May Like")
                 LazyRow(modifier = Modifier.padding(start = 16.dp)) {
-                    items(comingSoonManga) { manga ->
+                    items(relevantManga) { manga ->
                         MangaCard(manga = manga, onClick = { onMangaClick(manga.id) })
                     }
                 }
@@ -143,7 +146,7 @@ fun GreetingHeader(
             Text(
                 text = userName,
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFFFF004C)
+                color = Color(0xFFDA0037)
             )
         }
     }
