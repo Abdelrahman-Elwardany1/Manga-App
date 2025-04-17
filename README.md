@@ -6,6 +6,13 @@
 
 An Android app for discovering and reading manga, powered by the **MangaDex API**. Built with modern Android practices, including Jetpack Compose, Clean Architecture, and real-time synchronization.
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="app/src/main/res/pic1.png" alt="Home screen" width="30%">
+  <img src="app/src/main/res/pic2.png" alt="City screen" width="30%">
+  <img src="app/src/main/res/pic3.png" alt="Place screen" width="30%">
+  <img src="app/src/main/res/pic4.png" alt="Place screen" width="30%">
+</div>
+
 ---
 
 ## 📱 Features  
@@ -22,15 +29,14 @@ An Android app for discovering and reading manga, powered by the **MangaDex API*
 ---
 
 ## 🛠️ Technologies  
-- **Language**: Kotlin  
-- **UI**: Jetpack Compose, Coil (image loading)  
-- **Networking**: Retrofit (MangaDex API integration), Kotlin Coroutines  
-- **Authentication**: Firebase Authentication  
-- **Database**:  
-  - **Cloud**: Firebase Firestore (user profiles)  
-  - **Local**: Room (offline reading history)  
-- **Architecture**: Clean Architecture (feature-based modules), MVVM  
-- **Dependency Injection**: Hilt  
+- **Android**: Kotlin, Coroutines, ViewModel
+- **UI**: Jetpack Compose, Coil (image loading)
+- **Networking**: Retrofit (MangaDex API integration)
+- **Authentication**: Firebase Authentication
+- **Database**:
+  - **Cloud**: Firebase Firestore (user profiles)
+  - **Local**: Room (offline reading history)
+- **Architecture**: Clean Architecture (feature-based modules), MVVM
 
 ---
 
@@ -39,6 +45,7 @@ The app follows **feature-based Clean Architecture** with **MVVM** to ensure sep
 
 ---
 
-## 🚀 Getting Started  
-**Clone the repository**:  
+## Getting Started  
+### Clone the repository:
+   ```bash  
    git clone https://github.com/Abdelrahman-Elwardany1/Manga-App.git
