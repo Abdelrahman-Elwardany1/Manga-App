@@ -1,21 +1,21 @@
-# Manga Reader App 📖
+# Manga Reader App
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)](https://kotlinlang.org/)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-1.5.4-brightgreen)](https://developer.android.com/jetpack/compose)
+[![Kotlin](https://img.shields.io/badge/Kotlin-blue.svg)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-brightgreen)](https://developer.android.com/jetpack/compose)
 [![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✓-success)](https://developer.android.com/topic/architecture)
 
 An Android app for discovering and reading manga, powered by the **MangaDex API**. Built with modern Android practices, including Jetpack Compose, Clean Architecture, and real-time synchronization.
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="app/src/main/res/drawable/pic1.png" alt="Home screen" width="30%">
-  <img src="app/src/main/res/drawable/pic2.png" alt="City screen" width="30%">
-  <img src="app/src/main/res/drawable/pic3.png" alt="Place screen" width="30%">
-  <img src="app/src/main/res/drawable/pic4.png" alt="Place screen" width="30%">
+  <img src="app/src/main/res/drawable/pic1.png" alt="Home screen" width="25%">
+  <img src="app/src/main/res/drawable/pic2.png" alt="City screen" width="25%">
+  <img src="app/src/main/res/drawable/pic3.png" alt="Place screen" width="25%">
+  <img src="app/src/main/res/drawable/pic4.png" alt="Place screen" width="25%">
 </div>
 
 ---
 
-## 📱 Features  
+## Features  
 ### Core Functionality  
 - **Explore Manga**: Browse popular, latest, and trending manga with cover art, descriptions, and chapters.  
 - **Search & Filter**: Search manga by title or filter by genre/category.  
@@ -28,7 +28,7 @@ An Android app for discovering and reading manga, powered by the **MangaDex API*
 
 ---
 
-## 🛠️ Technologies  
+## Technologies  
 - **Android**: Kotlin, Coroutines, ViewModel
 - **UI**: Jetpack Compose, Coil (image loading)
 - **Networking**: Retrofit (MangaDex API integration)
@@ -40,7 +40,7 @@ An Android app for discovering and reading manga, powered by the **MangaDex API*
 
 ---
 
-## 🏗️ Architecture  
+## Architecture  
 The app follows **feature-based Clean Architecture** with **MVVM** to ensure separation of concerns, testability, and scalability:
 
 ---
