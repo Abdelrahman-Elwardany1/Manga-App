@@ -7,20 +7,20 @@
 An Android app for discovering and reading manga, powered by the **MangaDex API**. Built with modern Android practices, including Jetpack Compose, Clean Architecture, and real-time synchronization.
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="app/src/main/res/drawable/pic1.png" alt="Home screen" width="23%">
-  <img src="app/src/main/res/drawable/pic2.png" alt="City screen" width="23%">
-  <img src="app/src/main/res/drawable/pic3.png" alt="Place screen" width="23%">
-  <img src="app/src/main/res/drawable/pic4.png" alt="Place screen" width="23%">
+  <img src="app/src/main/res/drawable/pic1.png" alt="Home screen" width="24%">
+  <img src="app/src/main/res/drawable/pic2.png" alt="City screen" width="24%">
+  <img src="app/src/main/res/drawable/pic3.png" alt="Place screen" width="24%">
+  <img src="app/src/main/res/drawable/pic4.png" alt="Place screen" width="24%">
 </div>
 
 ---
 
 ## Features  
 ### Core Functionality  
-- **Explore Manga**: Browse popular, latest, and trending manga with cover art, descriptions, and chapters.  
-- **Search & Filter**: Search manga by title or filter by genre/category.  
-- **Reading Experience**: Read chapters seamlessly with paginated navigation.  
-- **User Authentication**: Secure sign-up/login using **Firebase Authentication**.  
+- **Explore Manga**: Browse popular, latest, and trending manga with cover art, descriptions, and chapters.
+- **Search & Filter**: Search manga by title or filter by genre/category.
+- **Reading Experience**: Read chapters seamlessly with paginated navigation.
+- **User Authentication**: Secure sign-up/login using **Firebase Authentication**.
 
 ### Personalized Experience  
 - **Reading History**: Track progress with timestamps (last read date/time) using **Room Database**.  
@@ -35,8 +35,8 @@ An Android app for discovering and reading manga, powered by the **MangaDex API*
 - **Authentication**: Firebase Authentication
 - **Database**:
   - **Cloud**: Firebase Firestore (user profiles)
-  - **Local**: Room (offline reading history)
-- **Architecture**: Clean Architecture (feature-based modules), MVVM
+  - **Local**: Room (reading history)
+- **Architecture**: Feature-based Clean Architecture, MVVM
 
 ---
 
