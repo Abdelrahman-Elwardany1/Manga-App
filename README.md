@@ -7,10 +7,10 @@
 An Android app for discovering and reading manga, powered by the **MangaDex API**. Built with modern Android practices, including Jetpack Compose, Clean Architecture, and real-time synchronization.
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="app/src/main/res/pic1.png" alt="Home screen" width="30%">
-  <img src="app/src/main/res/pic2.png" alt="City screen" width="30%">
-  <img src="app/src/main/res/pic3.png" alt="Place screen" width="30%">
-  <img src="app/src/main/res/pic4.png" alt="Place screen" width="30%">
+  <img src="app/src/main/res/drawable/pic1.png" alt="Home screen" width="30%">
+  <img src="app/src/main/res/drawable/pic2.png" alt="City screen" width="30%">
+  <img src="app/src/main/res/drawable/pic3.png" alt="Place screen" width="30%">
+  <img src="app/src/main/res/drawable/pic4.png" alt="Place screen" width="30%">
 </div>
 
 ---
