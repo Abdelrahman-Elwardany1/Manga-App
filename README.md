@@ -41,7 +41,7 @@ An Android app for discovering and reading manga, powered by the **MangaDex API*
 ---
 
 ## Architecture  
-The app follows **feature-based Clean Architecture** with **MVVM** to ensure separation of concerns, testability, and scalability:
+The app follows **feature-based Clean Architecture** with **MVVM** to ensure separation of concerns, testability and scalability.
 
 ---
 
